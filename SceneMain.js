@@ -59,6 +59,24 @@ class SceneMain extends Phaser.Scene {
         this.physics.add.collider(this.miner, this.guards, (miner, guard)=>{
             this.repositionMiner();
         }, null, this);
+
+
+        // These are useful when new treasures are positioned directly on the miner/wagon
+        this.physics.add.overlap(this.miner, this.golds, (miner, gold)=>{
+            console.log('overlap');
+            this.collectingGold(gold);
+        }, null, this);
+
+        this.physics.add.overlap(this.miner, this.crystals, (miner, crystal)=>{
+            console.log('overlap');
+            this.collectingCrystals(crystal);
+        }, null, this);
+
+        this.physics.add.overlap(this.miner, this.diamonds, (miner, diamond)=>{            
+            console.log('overlap');
+
+            this.collectingDiamonds(diamond);
+        }, null, this);
     }
 
     update(){
@@ -268,7 +286,7 @@ class SceneMain extends Phaser.Scene {
     determineBackgroundFun = (temperature) => {
         // if no temperature was retrieved from the api
         if(temperature === -1234) return; 
-        
+
         if(temperature <= 15){
             this.background = this.add.tileSprite(0, 0, config.width, config.height, 'backgroundCold', this).setDepth(-1);
             this.background.setOrigin(0, 0);
