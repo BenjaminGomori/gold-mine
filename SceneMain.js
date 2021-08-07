@@ -24,6 +24,7 @@ class SceneMain extends Phaser.Scene {
         this.stage2 = false;
         this.stage3 = false;
         this.SCORE_SECTION_HEIGHT = 50;
+        this.minerIsActive = true;
 
         this.requestUserLocation(this.determineBackgroundFun);
         this.add.rectangle(0, 0, 1000, 100, 0x757575);
@@ -33,7 +34,7 @@ class SceneMain extends Phaser.Scene {
         this.livesLabel =  this.add.text(config.width - 95, 17, `+${this.minerLives}`, { color:'#FFD700', fontStyle:'bold', fontFamily: 'Courier New', fontSize:'28px'});
         this.physics.add.image(config.width - 35, 32, 'lives').setImmovable();  
 
-        this.miner = this.physics.add.image(0, 550, 'miner').setDepth(1).setImmovable();
+        this.miner = this.physics.add.image(config.width/2, config.height, 'miner').setDepth(1).setImmovable();
         this.miner.setCollideWorldBounds(true);
 
         this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -45,61 +46,76 @@ class SceneMain extends Phaser.Scene {
         this.createGuards();
 
         this.physics.add.collider(this.miner, this.golds, (miner, gold)=>{
-            this.collectingGold(gold);
+            //Minor/wagon should not collect treasures as it gets back to life
+            if(this.minerIsActive === true){
+                this.collectingGold(gold);
+            }
         }, null, this);
 
         this.physics.add.collider(this.miner, this.crystals, (miner, crystal)=>{
-            this.collectingCrystals(crystal);
+            if(this.minerIsActive === true){
+                this.collectingCrystals(crystal);
+            }
         }, null, this);
 
         this.physics.add.collider(this.miner, this.diamonds, (miner, diamond)=>{
-            this.collectingDiamonds(diamond);
+            if(this.minerIsActive === true){
+                this.collectingDiamonds(diamond);
+            }
         }, null, this);
 
         this.physics.add.collider(this.miner, this.guards, (miner, guard)=>{
-            this.repositionMiner();
+            //Minor not lose more lives as he gets back to life
+            if(this.minerIsActive === true){
+                this.repositionMiner();
+            }
         }, null, this);
-
 
         // These are useful when new treasures are positioned directly on the miner/wagon
         this.physics.add.overlap(this.miner, this.golds, (miner, gold)=>{
-            console.log('overlap');
-            this.collectingGold(gold);
+            if(this.minerIsActive === true){
+                this.collectingGold(gold);
+            }
         }, null, this);
 
         this.physics.add.overlap(this.miner, this.crystals, (miner, crystal)=>{
-            console.log('overlap');
-            this.collectingCrystals(crystal);
+            if(this.minerIsActive === true){
+                this.collectingCrystals(crystal);
+            }
         }, null, this);
 
         this.physics.add.overlap(this.miner, this.diamonds, (miner, diamond)=>{            
-            console.log('overlap');
-
-            this.collectingDiamonds(diamond);
+            if(this.minerIsActive === true){
+                console.log('overlap');
+                this.collectingDiamonds(diamond);
+            }
         }, null, this);
     }
 
     update(){
         // Controls the miner wagon movement, based on phaser week1 tutorial
-        if(this.cursorKeys.left.isDown){
-            this.miner.setVelocityX(-140);
-        }else if(this.cursorKeys.right.isDown){
-            this.miner.setVelocityX(140);
-        } else if(this.cursorKeys.left.up){
-            this.miner.setVelocityX(0);
-        }else if(this.cursorKeys.right.isUp){
-            this.miner.setVelocityX(0);
-        } 
-
-        if(this.cursorKeys.up.isDown){
-            this.miner.setVelocityY(-140);
-        }else if(this.cursorKeys.down.isDown){
-            this.miner.setVelocityY(140);
-        }else if(this.cursorKeys.up.isUp){
-            this.miner.setVelocityY(0);
-        }else if(this.cursorKeys.down.isUp){
-            this.miner.setVelocityY(0);
-        }   
+        if(this.miner.alpha === 1){
+            if(this.cursorKeys.left.isDown){
+                this.miner.setVelocityX(-140);
+            }else if(this.cursorKeys.right.isDown){
+                this.miner.setVelocityX(140);
+            } else if(this.cursorKeys.left.up){
+                this.miner.setVelocityX(0);
+            }else if(this.cursorKeys.right.isUp){
+                this.miner.setVelocityX(0);
+            } 
+    
+            if(this.cursorKeys.up.isDown){
+                this.miner.setVelocityY(-140);
+            }else if(this.cursorKeys.down.isDown){
+                this.miner.setVelocityY(140);
+            }else if(this.cursorKeys.up.isUp){
+                this.miner.setVelocityY(0);
+            }else if(this.cursorKeys.down.isUp){
+                this.miner.setVelocityY(0);
+            } 
+        }
+  
 
         // guards fully displayed even at x vertex edges
         if((this.guard1.x <= this.guard1.width/2 && this.guard1.body.velocity.x < 0) || (this.guard1.x >= config.width - this.guard1.width/2 && this.guard1.body.velocity.x > 0)){
@@ -216,12 +232,12 @@ class SceneMain extends Phaser.Scene {
     }
 
     repositionMiner = () => {
-        this.miner.x = 0;
-        this.miner.y = 500;
         this.minerLives--;
         this.livesLabel.text = `+${this.minerLives}`; 
 
-        if(this.minerLives<0){
+        this.backToLife();
+
+        if(this.minerLives < 0){
             alert(`
             Game over.
             Your score is: ${this.score}. 
@@ -233,8 +249,25 @@ class SceneMain extends Phaser.Scene {
         }
     }
 
+    backToLife = () => {
+        this.minerIsActive = false;
+        this.miner.alpha = .6;
 
-    gameCompleted=()=>{
+        this.tweens.add({
+            targets: this.miner,
+            x: config.width/2,
+            y: config.height,
+            duration: 1250,
+            repeat: 0,
+            onComplete: () => {
+                this.miner.alpha = 1;
+                this.minerIsActive = true;
+            },
+            callbackScope: this
+        });
+    }
+
+    gameCompleted = () => {
        alert(`
             Game Completed!
             Your score is: ${this.score}
@@ -245,7 +278,7 @@ class SceneMain extends Phaser.Scene {
             this.scene.restart();// restart current scene
     }
 
-    adjustScoreLabel(){
+    adjustScoreLabel = () =>{
         let maxDigits = Math.pow(10, this.SCORE_NUM_DIGITS);
         let scoreString = '';
 
@@ -258,7 +291,7 @@ class SceneMain extends Phaser.Scene {
     }
 
     //I used similar code for the extra credit assignment - Benjamin Gomori
-    requestUserLocation(determineBackgroundFun){
+    requestUserLocation = (determineBackgroundFun) => {
         if('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition((position) => {
                 let latitude = position.coords.latitude;
