@@ -153,7 +153,7 @@ class SceneMain extends Phaser.Scene {
         for(let i = 0; i< 8; i++){
             let x = Math.random() * (config.width - crystalWidth);
             let y = Math.random() * (config.height - this.SCORE_SECTION_HEIGHT - crystalHeight);
-            let crystal = this.physics.add.image(x + crystalWidth/2, y + this.SCORE_SECTION_HEIGHT + crystalHeight, 'crystal').setImmovable();  
+            let crystal = this.physics.add.image(x + crystalWidth/2, y + this.SCORE_SECTION_HEIGHT + crystalHeight/2, 'crystal').setImmovable();  
             this.crystals.add(crystal);
         }
     }
@@ -165,7 +165,7 @@ class SceneMain extends Phaser.Scene {
         for(let i = 0; i< 5; i++){
             let x = Math.random() * (config.width - diamondWidth);
             let y = Math.random() * (config.height - this.SCORE_SECTION_HEIGHT - diamondHeight);
-            let diamond = this.physics.add.image(x + diamondWidth/2, y + this.SCORE_SECTION_HEIGHT + diamondHeight, 'diamond').setImmovable();  
+            let diamond = this.physics.add.image(x + diamondWidth/2, y + this.SCORE_SECTION_HEIGHT + diamondHeight/2, 'diamond').setImmovable();  
             this.diamonds.add(diamond);
         }
     }
