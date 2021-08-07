@@ -86,7 +86,6 @@ class SceneMain extends Phaser.Scene {
 
         this.physics.add.overlap(this.miner, this.diamonds, (miner, diamond)=>{            
             if(this.minerIsActive === true){
-                console.log('overlap');
                 this.collectingDiamonds(diamond);
             }
         }, null, this);
@@ -303,14 +302,12 @@ class SceneMain extends Phaser.Scene {
             if (data.main && data.main.temp !== undefined){
                 temperature = data.main.temp;
             }
-            console.log('temperature: ' + temperature + ' Celsius');
             this.determineBackgroundFun(temperature);
         })
         .catch(err => console.warn(err.message));
     }
 
     onNoLocationProvided = (error) => {
-        console.log('Geo Location is not available');
         this.determineBackgroundFun(20);
     }
     
@@ -330,7 +327,6 @@ class SceneMain extends Phaser.Scene {
 
     determineBackgroundFun = (temperature) => {
         //these numbers represent degrees in celsius.
-        console.log(temperature);
         if(temperature <= 10){
             this.background = this.add.tileSprite(0, 0, config.width, config.height, 'backgroundCold', this).setDepth(-1);
             this.background.setOrigin(0, 0);
