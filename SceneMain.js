@@ -12,7 +12,7 @@ class SceneMain extends Phaser.Scene {
         this.load.image('diamond', 'assets/diamond.png');
         this.load.image('rock', 'assets/rock.png');
         this.load.image('backgroundRegular','assets/backgrounds/regular.jpg');
-        this.load.image('backgroundHot','assets/backgrounds/hot.jpg');
+        this.load.image('backgroundHot','assets/backgrounds/desert.jpg');
         this.load.image('backgroundCold','assets/backgrounds/cold.jpg');
     }
 
@@ -290,45 +290,57 @@ class SceneMain extends Phaser.Scene {
         this.scoreLabel.text = 'SCORE ' + scoreString + this.score;
     }
 
-    //I used similar code for the extra credit assignment - Benjamin Gomori
+    onLocationProvided = (position) => {
+        //I used similar code for the extra credit assignment - Benjamin Gomori
+        let latitude = position.coords.latitude;
+        let longitude = position.coords.longitude;
+        let temperature = 20;
+        const KEY = "40957205b16d09e2892fceabaad8f847";
+        let url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${KEY}&units=metric`;
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.main && data.main.temp !== undefined){
+                temperature = data.main.temp;
+            }
+            console.log('temperature: ' + temperature + ' Celsius');
+            this.determineBackgroundFun(temperature);
+        })
+        .catch(err => console.warn(err.message));
+    }
+
+    onNoLocationProvided = (error) => {
+        console.log('Geo Location is not available');
+        this.determineBackgroundFun(20);
+    }
+    
     requestUserLocation = (determineBackgroundFun) => {
+        //based on https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
+        var options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          };
+
         if('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                let latitude = position.coords.latitude;
-                let longitude = position.coords.longitude;
-                let temperature = -1234;
-                const KEY = "40957205b16d09e2892fceabaad8f847";
-                let url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${KEY}&units=metric`;
-                // this.temperature = 
-                fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.main && data.main.temp !== undefined){
-                        temperature = data.main.temp;
-                    }
-                    console.log('temperature: ' + temperature + ' Celsius');
-                    determineBackgroundFun(temperature);
-                })
-                .catch(err => console.warn(err.message));
-            });
-        } else {
-            console.log('Geo Location is not available');
+            navigator.geolocation.getCurrentPosition(this.onLocationProvided, this.onNoLocationProvided, options);
         }
     }
 
-    determineBackgroundFun = (temperature) => {
-        // if no temperature was retrieved from the api
-        if(temperature === -1234) return; 
 
-        if(temperature <= 15){
+    determineBackgroundFun = (temperature) => {
+        //these numbers represent degrees in celsius.
+        console.log(temperature);
+        if(temperature <= 10){
             this.background = this.add.tileSprite(0, 0, config.width, config.height, 'backgroundCold', this).setDepth(-1);
             this.background.setOrigin(0, 0);
-        } else if(temperature > 15 && temperature < 25){
-            this.background = this.add.tileSprite(0, 0, config.width, config.height, 'backgroundRegular', this).setDepth(-1);
-            this.background.setOrigin(0, 0);       
-        } else {
+        } else if(temperature >= 30) {
             this.background = this.add.tileSprite(0, 0, config.width, config.height, 'backgroundHot', this).setDepth(-1);
             this.background.setOrigin(0, 0);
+        } else {
+            //default background
+            this.background = this.add.tileSprite(0, 0, config.width, config.height, 'backgroundRegular', this).setDepth(-1);
+            this.background.setOrigin(0, 0);       
         }
     } 
 }
