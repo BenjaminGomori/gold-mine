@@ -15,5 +15,4 @@ JavaScript</br>
 HTML</br>
 The Open Weather Map API 
 
-![alt text](![image](https://user-images.githubusercontent.com/54749949/128617234-f584a11b-24fe-4698-9762-5cb3bda61bb4.png)
-)
+![Alt text](./assets/forReadMe.PNG)
