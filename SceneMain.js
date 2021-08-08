@@ -278,7 +278,7 @@ class SceneMain extends Phaser.Scene {
     }
 
     adjustScoreLabel = () =>{
-        let maxDigits = Math.pow(10, this.SCORE_NUM_DIGITS);
+        let maxDigits = Math.pow(10, this.SCORE_NUM_DIGITS - 1);
         let scoreString = '';
 
         while(this.score < maxDigits){
